@@ -1,8 +1,9 @@
 """
 Demo setup script.
 
-Writes a description to the customers dataset in DataHub so the LLM judge
-has context to evaluate against. Run once before starting the agent.
+Writes a description and attaches a glossary term to the customers dataset
+in DataHub so the LLM judge has rich context to evaluate against.
+Run once before starting the agent.
 
 Usage:
     python scripts/setup_demo.py
@@ -14,9 +15,16 @@ sys.path.insert(0, ".")
 
 from datahub.emitter.mcp import MetadataChangeProposalWrapper
 from datahub.emitter.rest_emitter import DatahubRestEmitter
-from datahub.metadata.schema_classes import DatasetPropertiesClass
+from datahub.metadata.schema_classes import (
+    AuditStampClass,
+    DatasetPropertiesClass,
+    GlossaryTermAssociationClass,
+    GlossaryTermInfoClass,
+    GlossaryTermsClass,
+)
 
 DATASET_URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"
+GLOSSARY_TERM_URN = "urn:li:glossaryTerm:Finance.NumericMetric"
 GMS_URL = "http://localhost:8080"
 
 DESCRIPTION = (
@@ -24,19 +32,41 @@ DESCRIPTION = (
     "approved for each customer, stored as a numeric value in the account currency."
 )
 
+_AUDIT_STAMP = AuditStampClass(time=0, actor="urn:li:corpuser:datahub")
+
 
 def main() -> None:
     emitter = DatahubRestEmitter(gms_server=GMS_URL)
-    mcp = MetadataChangeProposalWrapper(
+
+    emitter.emit(MetadataChangeProposalWrapper(
         entityUrn=DATASET_URN,
         aspect=DatasetPropertiesClass(
             description=DESCRIPTION,
             customProperties={},
         ),
-    )
-    emitter.emit(mcp)
-    print(f"Description written to DataHub for:\n  {DATASET_URN}")
-    print(f"\nDescription:\n  {DESCRIPTION}")
+    ))
+    print(f"Description written for:\n  {DATASET_URN}")
+
+    emitter.emit(MetadataChangeProposalWrapper(
+        entityUrn=GLOSSARY_TERM_URN,
+        aspect=GlossaryTermInfoClass(
+            definition=(
+                "A field that stores a numeric financial measurement such as "
+                "an amount, limit, or balance. Values are expected to be numbers."
+            ),
+            name="NumericMetric",
+        ),
+    ))
+    print(f"\nGlossary term created:\n  {GLOSSARY_TERM_URN}")
+
+    emitter.emit(MetadataChangeProposalWrapper(
+        entityUrn=DATASET_URN,
+        aspect=GlossaryTermsClass(
+            terms=[GlossaryTermAssociationClass(urn=GLOSSARY_TERM_URN)],
+            auditStamp=_AUDIT_STAMP,
+        ),
+    ))
+    print(f"\nGlossary term attached to dataset.")
     print("\nDone. You can now start the agent with: python -m agent")
 
 
