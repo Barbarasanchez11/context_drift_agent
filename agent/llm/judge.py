@@ -4,6 +4,7 @@ import json
 from datetime import UTC, datetime
 
 import anthropic
+import groq as groq_sdk
 import openai
 
 from agent.llm.prompts import build_prompt
@@ -41,7 +42,16 @@ def _call_llm(prompt: str, provider: str, api_key: str, model: str) -> str:
         )
         return response.choices[0].message.content
 
-    raise ValueError(f"Unsupported LLM provider: {provider!r}. Use 'anthropic' or 'openai'.")
+    if provider == "groq":
+        client = groq_sdk.Groq(api_key=api_key)
+        response = client.chat.completions.create(
+            model=model,
+            max_tokens=256,
+            messages=[{"role": "user", "content": prompt}],
+        )
+        return response.choices[0].message.content
+
+    raise ValueError(f"Unsupported LLM provider: {provider!r}. Use 'anthropic', 'openai', or 'groq'.")
 
 
 def _parse_response(raw_text: str, dataset_urn: str) -> DriftResult:

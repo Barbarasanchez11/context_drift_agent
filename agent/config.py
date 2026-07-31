@@ -12,19 +12,26 @@ class Settings(BaseSettings):
     llm_provider: str = "anthropic"
     anthropic_api_key: str | None = None
     openai_api_key: str | None = None
+    groq_api_key: str | None = None
     llm_model: str = "claude-sonnet-4-6"
 
     poll_interval_seconds: int = 30
     dataset_urns: str = ""
 
     def get_urns(self) -> list[str]:
-        return [u.strip() for u in self.dataset_urns.split(",") if u.strip()]
+        # URNs are pipe-separated because URNs themselves contain commas
+        return [u.strip() for u in self.dataset_urns.split("|") if u.strip()]
 
     def get_api_key(self) -> str:
-        key = self.anthropic_api_key if self.llm_provider == "anthropic" else self.openai_api_key
+        key_map = {
+            "anthropic": self.anthropic_api_key,
+            "openai": self.openai_api_key,
+            "groq": self.groq_api_key,
+        }
+        key = key_map.get(self.llm_provider)
         if not key:
             raise ValueError(
                 f"No API key configured for provider '{self.llm_provider}'. "
-                f"Set ANTHROPIC_API_KEY or OPENAI_API_KEY in your .env file."
+                f"Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or GROQ_API_KEY in your .env file."
             )
         return key

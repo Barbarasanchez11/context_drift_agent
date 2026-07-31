@@ -11,6 +11,7 @@ dependencies = [
     "acryl-datahub>=0.14",
     "anthropic>=0.30",
     "openai>=1.30",
+    "groq>=0.9",
 ]
 
 [project.scripts]
