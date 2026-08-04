@@ -17,7 +17,7 @@ CONTEXT = ContextSnapshot(**_fixture["context"])
 VALID_DATA = {
     "context_stale": True,
     "context_confidence": 0.92,
-    "context_drift_reason": "Field type changed from NUMBER to STRING, description implies numeric value.",
+    "context_drift_reason": "Field type changed from NUMBER to STRING, description implies numeric value.",  # noqa: E501
 }
 
 

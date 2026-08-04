@@ -8,7 +8,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
-from agent.models import FieldChange, SchemaField, SchemaDiff
+from agent.models import FieldChange, SchemaDiff, SchemaField
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,14 @@ def detect_change(
 
     for path, field in current_by_path.items():
         if path not in previous_by_path:
-            changes.append(FieldChange(field_path=path, old_type=None, new_type=field.native_data_type, change_type="added"))
+            changes.append(
+                FieldChange(
+                    field_path=path,
+                    old_type=None,
+                    new_type=field.native_data_type,
+                    change_type="added",
+                )
+            )
         elif previous_by_path[path].native_data_type != field.native_data_type:
             changes.append(FieldChange(
                 field_path=path,
@@ -45,7 +52,14 @@ def detect_change(
 
     for path, field in previous_by_path.items():
         if path not in current_by_path:
-            changes.append(FieldChange(field_path=path, old_type=field.native_data_type, new_type=None, change_type="removed"))
+            changes.append(
+                FieldChange(
+                    field_path=path,
+                    old_type=field.native_data_type,
+                    new_type=None,
+                    change_type="removed",
+                )
+            )
 
     return SchemaDiff(
         dataset_urn=urn,
@@ -95,7 +109,11 @@ def run_poll_loop(
                 diff = detect_change(urn, current, previous)
 
                 if diff:
-                    logger.info("Schema change detected for %s: %d field(s) changed", urn, len(diff.changed_fields))
+                    logger.info(
+                        "Schema change detected for %s: %d field(s) changed",
+                        urn,
+                        len(diff.changed_fields),
+                    )
                     _save_state(urn, current, state_path)
                     on_change(diff)
                 else:

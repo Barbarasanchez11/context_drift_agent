@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     poll_interval_seconds: int = 30
     dataset_urns: str = ""
 
+    use_mcp_context: bool = True
+
     def get_urns(self) -> list[str]:
         # URNs are pipe-separated because URNs themselves contain commas
         return [u.strip() for u in self.dataset_urns.split("|") if u.strip()]

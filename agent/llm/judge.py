@@ -9,7 +9,7 @@ import groq as groq_sdk
 import openai
 
 from agent.llm.prompts import build_prompt
-from agent.models import ContextSnapshot, DriftResult, SchemaDiff
+from agent.models import ContextSnapshot, DriftResult, RichContext, SchemaDiff
 
 _TOOL_NAME = "report_drift"
 _TOOL_SCHEMA = {
@@ -35,8 +35,9 @@ def evaluate(
     llm_provider: str,
     api_key: str,
     model: str,
+    rich_context: RichContext | None = None,
 ) -> DriftResult:
-    prompt = build_prompt(diff, context)
+    prompt = build_prompt(diff, context, rich_context)
     data = _call_llm(prompt, llm_provider, api_key, model)
     return _parse_response(data, diff.dataset_urn)
 
@@ -75,6 +76,7 @@ def _call_llm(prompt: str, provider: str, api_key: str, model: str) -> dict:
             response = client.chat.completions.create(
                 model=model,
                 max_tokens=256,
+                response_format={"type": "json_object"},
                 messages=[{"role": "user", "content": prompt}],
                 timeout=_LLM_TIMEOUT,
             )
@@ -86,7 +88,7 @@ def _call_llm(prompt: str, provider: str, api_key: str, model: str) -> dict:
                 last_error = exc
         raise ValueError(f"Groq returned non-JSON after 2 attempts: {raw!r}") from last_error
 
-    raise ValueError(f"Unsupported LLM provider: {provider!r}. Use 'anthropic', 'openai', or 'groq'.")
+    raise ValueError(f"Unsupported LLM provider: {provider!r}. Use 'anthropic', 'openai', or 'groq'.")  # noqa: E501
 
 
 def _parse_response(data: dict, dataset_urn: str) -> DriftResult:

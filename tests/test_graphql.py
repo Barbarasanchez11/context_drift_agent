@@ -23,8 +23,8 @@ class TestGetSchema:
                 "dataset": {
                     "schemaMetadata": {
                         "fields": [
-                            {"fieldPath": "credit_limit", "nativeDataType": "NUMBER", "description": None},
-                            {"fieldPath": "cust_email", "nativeDataType": "STRING", "description": "Customer email"},
+                            {"fieldPath": "credit_limit", "nativeDataType": "NUMBER", "description": None},  # noqa: E501
+                            {"fieldPath": "cust_email", "nativeDataType": "STRING", "description": "Customer email"},  # noqa: E501
                         ]
                     }
                 }
@@ -35,7 +35,7 @@ class TestGetSchema:
 
         assert result == [
             SchemaField(field_path="credit_limit", native_data_type="NUMBER", description=None),
-            SchemaField(field_path="cust_email", native_data_type="STRING", description="Customer email"),
+            SchemaField(field_path="cust_email", native_data_type="STRING", description="Customer email"),  # noqa: E501
         ]
 
     def test_returns_empty_list_when_schema_metadata_null(self) -> None:

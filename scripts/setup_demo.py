@@ -11,6 +11,7 @@ Usage:
 from __future__ import annotations
 
 import sys
+
 sys.path.insert(0, ".")
 
 from datahub.emitter.mcp import MetadataChangeProposalWrapper
@@ -23,7 +24,7 @@ from datahub.metadata.schema_classes import (
     GlossaryTermsClass,
 )
 
-DATASET_URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"
+DATASET_URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"  # noqa: E501
 GLOSSARY_TERM_URN = "urn:li:glossaryTerm:Finance.NumericMetric"
 GMS_URL = "http://localhost:8080"
 
@@ -55,6 +56,7 @@ def main() -> None:
                 "an amount, limit, or balance. Values are expected to be numbers."
             ),
             name="NumericMetric",
+            termSource="INTERNAL",
         ),
     ))
     print(f"\nGlossary term created:\n  {GLOSSARY_TERM_URN}")
@@ -66,7 +68,7 @@ def main() -> None:
             auditStamp=_AUDIT_STAMP,
         ),
     ))
-    print(f"\nGlossary term attached to dataset.")
+    print("\nGlossary term attached to dataset.")
     print("\nDone. You can now start the agent with: python -m agent")
 
 

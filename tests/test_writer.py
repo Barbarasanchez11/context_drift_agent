@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 from agent.datahub.writer import write_drift_result
 from agent.models import DriftResult
 
-URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"
+URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"  # noqa: E501
 
 RESULT = DriftResult(
     dataset_urn=URN,
@@ -42,7 +42,7 @@ class TestWriteDriftResult:
 
     def test_passes_token_to_emitter(self) -> None:
         mock_emitter = MagicMock()
-        with patch("agent.datahub.writer.DatahubRestEmitter", return_value=mock_emitter) as mock_cls:
+        with patch("agent.datahub.writer.DatahubRestEmitter", return_value=mock_emitter) as mock_cls:  # noqa: E501
             write_drift_result(URN, RESULT, "http://localhost:8080", token="my-token")
 
         mock_cls.assert_called_once_with(gms_server="http://localhost:8080", token="my-token")

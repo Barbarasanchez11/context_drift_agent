@@ -12,6 +12,7 @@ def write_drift_result(
     result: DriftResult,
     gms_url: str,
     token: str | None = None,
+    existing_description: str | None = None,
 ) -> None:
     custom_properties = {
         "context_stale": str(result.context_stale).lower(),
@@ -22,6 +23,9 @@ def write_drift_result(
     emitter = DatahubRestEmitter(gms_server=gms_url, token=token)
     mcp = MetadataChangeProposalWrapper(
         entityUrn=urn,
-        aspect=DatasetPropertiesClass(customProperties=custom_properties),
+        aspect=DatasetPropertiesClass(
+            description=existing_description,
+            customProperties=custom_properties,
+        ),
     )
     emitter.emit(mcp)

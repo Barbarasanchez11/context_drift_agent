@@ -12,6 +12,23 @@ class SchemaField(BaseModel):
     description: str | None = None
 
 
+class DownstreamAsset(BaseModel):
+    urn: str
+    name: str
+    entity_type: str  # "DATASET", "DASHBOARD", "CHART", etc.
+    platform: str | None = None
+
+
+class RichContext(BaseModel):
+    """Extended context fetched via DataHub MCP Server (lineage + ownership)."""
+
+    dataset_urn: str
+    downstream_assets: list[DownstreamAsset] = []
+    owners: list[str] = []
+    domain: str | None = None
+    data_source: Literal["mcp", "unavailable"] = "unavailable"
+
+
 class FieldChange(BaseModel):
     field_path: str
     old_type: str | None

@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import sys
+
 sys.path.insert(0, ".")
 
 import argparse
@@ -30,7 +31,7 @@ from datahub.metadata.schema_classes import (
     StringTypeClass,
 )
 
-DATASET_URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"
+DATASET_URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"  # noqa: E501
 GMS_URL = "http://localhost:8080"
 
 _AUDIT_STAMP = AuditStampClass(time=0, actor="urn:li:corpuser:datahub")
@@ -39,7 +40,7 @@ _STRING_TYPE = SchemaFieldDataTypeClass(type=StringTypeClass())
 _NUMBER_TYPE = SchemaFieldDataTypeClass(type=NumberTypeClass())
 
 
-def _make_field(path: str, native_type: str, field_type: SchemaFieldDataTypeClass) -> SchemaFieldClass:
+def _make_field(path: str, native_type: str, field_type: SchemaFieldDataTypeClass) -> SchemaFieldClass:  # noqa: E501
     return SchemaFieldClass(
         fieldPath=path,
         type=field_type,
