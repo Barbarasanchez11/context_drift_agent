@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import base64
+
 import requests
 
 from agent.models import ContextSnapshot, SchemaField
+
+# Default credentials for DataHub OSS local quickstart (overridable via token param)
+_DEFAULT_BASIC_AUTH = "Basic " + base64.b64encode(b"datahub:datahub").decode()
 
 _SCHEMA_QUERY = """
 query GetSchema($urn: String!) {
@@ -35,7 +40,7 @@ query GetContext($urn: String!) {
 
 def _post(gms_url: str, token: str | None, query: str, variables: dict) -> dict:
     endpoint = f"{gms_url}/api/graphql"
-    auth_header = f"Bearer {token}" if token else "Basic ZGF0YWh1YjpkYXRhaHVi"
+    auth_header = f"Bearer {token}" if token else _DEFAULT_BASIC_AUTH
     headers = {
         "Content-Type": "application/json",
         "Authorization": auth_header,

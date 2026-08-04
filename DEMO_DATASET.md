@@ -20,22 +20,22 @@ architecture docs with a real dataset from the loaded showcase-ecommerce sample 
 | Attribute | Value |
 |---|---|
 | Field | `credit_limit` |
-| Current type | `Number` |
+| Current type | `FLOAT` |
 | Current description | `"Maximum credit amount for the customer"` |
 
 ---
 
 ## Demo Scenario
 
-**Before:** `credit_limit` is type `Number`, description says _"Maximum credit amount
+**Before:** `credit_limit` is type `FLOAT`, description says _"Maximum credit amount
 for the customer"_ — schema and documentation are consistent.
 
-**Change:** `credit_limit` type is changed to `String` (simulating a schema migration
+**Change:** `credit_limit` type is changed to `STRING` (simulating a schema migration
 where the field starts storing values like `"5000 EUR"` instead of a raw number).
 
 **Expected agent behavior:**
 
-1. **Poller** detects the schema change (`Number → String`) on this field.
+1. **Poller** detects the schema change (`FLOAT → STRING`) on this field.
 2. **Context Retriever** pulls the current description (`"Maximum credit amount for
    the customer"`) and any glossary terms.
 3. **LLM Judge** evaluates: the description implies a numeric amount, but the field
@@ -50,7 +50,7 @@ where the field starts storing values like `"5000 EUR"` instead of a raw number)
 
 | Field | Type | Description | Notes |
 |---|---|---|---|
-| `credit_limit` | Number | Maximum credit amount for the customer | **Selected** |
+| `credit_limit` | FLOAT | Maximum credit amount for the customer | **Selected** |
 | `cust_email` | String | Customer email address | Tagged "Email Address" |
 | `account_mgr_id` | Number | ID of the account manager assigned to the customer | |
 | `customer_since` | String | Date when customer was first registered | Already a String storing a date — backup scenario (e.g. date format change) |
