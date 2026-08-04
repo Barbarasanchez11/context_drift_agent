@@ -1,0 +1,17 @@
+# Context Drift Agent — Docker Compose
+#
+# This runs ONLY the agent container.
+# DataHub must be started separately:
+#   pip install acryl-datahub && datahub docker quickstart
+#
+# Then run the agent:
+#   docker compose up --build
+
+services:
+  context-drift-agent:
+    build: .
+    env_file: .env
+    network_mode: host      # reach DataHub on localhost:8080
+    restart: on-failure
+    volumes:
+      - ./.state:/app/.state  # persist schema state across restarts

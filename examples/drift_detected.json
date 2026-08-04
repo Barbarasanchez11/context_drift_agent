@@ -1,0 +1,38 @@
+{
+  "event": "drift_detected",
+  "dataset_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)",
+  "schema_change": {
+    "field": "credit_limit",
+    "old_type": "FLOAT",
+    "new_type": "VARCHAR(16777216)",
+    "detected_at": "2026-08-04T10:05:00Z"
+  },
+  "context_at_detection": {
+    "description": "Customer master table. The credit_limit field represents the maximum credit amount approved for each customer, stored as a numeric value in the account currency.",
+    "glossary_terms": ["Finance.NumericMetric"],
+    "mcp_enrichment": {
+      "downstream_assets": [
+        {"name": "credit_risk_dashboard", "entity_type": "DASHBOARD", "platform": "looker"},
+        {"name": "customer_analytics", "entity_type": "DATASET", "platform": "snowflake"},
+        {"name": "risk_scoring_model", "entity_type": "MLMODEL", "platform": "sagemaker"}
+      ],
+      "owners": ["urn:li:corpuser:data.engineering"],
+      "domain": "Finance",
+      "data_source": "mcp"
+    }
+  },
+  "llm_evaluation": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "context_stale": true,
+    "context_confidence": 0.95,
+    "context_drift_reason": "Field credit_limit changed from FLOAT to VARCHAR(16777216). The description states the field stores 'a numeric value in the account currency', and the glossary term Finance.NumericMetric explicitly requires numeric values. The VARCHAR type now permits non-numeric strings (e.g. '5000 EUR'). 3 downstream assets including credit_risk_dashboard and risk_scoring_model depend on this field and may compute incorrect aggregations."
+  },
+  "written_to_datahub": {
+    "customProperties": {
+      "context_stale": "true",
+      "context_confidence": "0.95",
+      "context_drift_reason": "Field credit_limit changed from FLOAT to VARCHAR(16777216). The description states the field stores 'a numeric value in the account currency', and the glossary term Finance.NumericMetric explicitly requires numeric values. The VARCHAR type now permits non-numeric strings (e.g. '5000 EUR'). 3 downstream assets including credit_risk_dashboard and risk_scoring_model depend on this field and may compute incorrect aggregations."
+    }
+  }
+}
