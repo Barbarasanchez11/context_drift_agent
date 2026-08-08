@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software in your research or projects, please cite it as below."
+type: software
+title: "Context Drift Agent"
+abstract: >
+  An open-source AI agent for DataHub OSS that detects when dataset documentation
+  becomes semantically inconsistent with the actual schema after a schema change.
+  Uses LLM-based evaluation to explain why existing context is stale and writes
+  a machine-readable freshness signal back into DataHub.
+authors:
+  - family-names: Sanchez
+    given-names: Barbara
+    email: Barbara.sanchez@dataquantum.es
+repository-code: "https://github.com/Barbarasanchez11/context-drift-agent"
+url: "https://github.com/Barbarasanchez11/context-drift-agent"
+license: Apache-2.0
+version: "0.1.0"
+date-released: "2026-08-08"
+keywords:
+  - datahub
+  - metadata
+  - data-quality
+  - llm
+  - schema-drift
+  - context-drift
+  - data-catalog
+  - open-source
+  - python
