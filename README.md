@@ -195,6 +195,68 @@ See [`DECISIONS.md`](DECISIONS.md) — key choices explained:
 
 ---
 
+## Synthetic Context Validation
+
+Beyond drift detection, the agent can validate whether a dataset's existing documentation
+is rich enough for a downstream AI agent to use confidently — before any schema change happens.
+
+```bash
+uv run python scripts/validate_context.py \
+  "urn:li:dataset:(urn:li:dataPlatform:snowflake,db.schema.customers,PROD)"
+```
+
+Generates 3 synthetic questions a downstream agent might ask, tests whether the current
+documentation can answer them using only the description and glossary terms, and writes
+the result back to DataHub:
+
+```
+=== Synthetic Context Validation ===
+Dataset:               urn:li:dataset:...
+context_answerable:    True
+context_qa_confidence: 0.82
+
+Q1 [PASS] What does credit_limit represent?
+     confidence=0.90 — Description clearly defines this as maximum credit in USD.
+Q2 [PASS] Can I filter high-value customers using this table?
+     confidence=0.85 — Glossary term HighValueCustomer is present.
+Q3 [PASS] Is this dataset safe to use for credit risk models?
+     confidence=0.70 — Description implies financial use case.
+```
+
+---
+
+## Roadmap
+
+### Adversarial LLM Evaluation
+
+Replace the single LLM judge with a two-agent debate:
+
+- **Prosecutor** — argues the context *is* stale, looks for inconsistencies
+- **Defender** — argues the context is *still valid*, avoids false alarms
+- **Arbiter** — synthesises both arguments into a final verdict
+
+When both agree the confidence is high. When they disagree the confidence is capped and both
+arguments are surfaced in `context_drift_reason`, giving operators full visibility into the
+uncertainty. This pattern is harder to fool than a single-pass evaluation and produces more
+explainable outputs.
+
+### Proactive Validation Loop
+
+Trigger `validate_context_sufficiency` automatically every time drift is detected, so both
+`context_stale` and `context_answerable` are written in a single pipeline pass.
+
+### Multi-dataset Monitoring Dashboard
+
+Aggregate drift and sufficiency signals across all monitored datasets into a single DataHub
+dashboard — useful for data quality teams managing hundreds of tables.
+
+### Structured Properties Migration
+
+Once DataHub OSS stabilises the Structured Properties API, migrate from `customProperties`
+(string key-value pairs) to typed properties with schema enforcement.
+
+---
+
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE).
