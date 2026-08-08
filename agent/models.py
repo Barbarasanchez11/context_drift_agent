@@ -57,3 +57,16 @@ class DriftResult(BaseModel):
     context_stale: bool
     context_confidence: float
     context_drift_reason: str
+
+
+class AnswerResult(BaseModel):
+    question: str
+    answered: bool
+    confidence: float
+    reasoning: str
+
+
+class ValidationResult(BaseModel):
+    questions: list[AnswerResult]
+    context_answerable: bool  # True if avg_confidence > 0.5
+    context_qa_confidence: float  # average confidence across all questions
