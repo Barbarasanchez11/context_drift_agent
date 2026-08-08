@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
-from agent.datahub.writer import write_drift_result
-from agent.models import DriftResult
+from agent.datahub.writer import write_drift_result, write_qa_result
+from agent.models import AnswerResult, DriftResult, ValidationResult
 
 URN = "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)"  # noqa: E501
 
@@ -46,3 +46,32 @@ class TestWriteDriftResult:
             write_drift_result(URN, RESULT, "http://localhost:8080", token="my-token")
 
         mock_cls.assert_called_once_with(gms_server="http://localhost:8080", token="my-token")
+
+
+class TestWriteQaResult:
+    def test_emits_mcp_with_qa_properties(self) -> None:
+        result = ValidationResult(
+            questions=[
+                AnswerResult(
+                    question="Is credit_limit in USD?",
+                    answered=True,
+                    confidence=0.85,
+                    reasoning="Description confirms USD.",
+                )
+            ],
+            context_answerable=True,
+            context_qa_confidence=0.85,
+        )
+        mock_emitter = MagicMock()
+        with patch("agent.datahub.writer.DatahubRestEmitter", return_value=mock_emitter):
+            write_qa_result(
+                urn="urn:li:dataset:(urn:li:dataPlatform:snowflake,customers,PROD)",
+                result=result,
+                gms_url="http://localhost:8080",
+            )
+
+        mock_emitter.emit.assert_called_once()
+        mcp = mock_emitter.emit.call_args[0][0]
+        props = mcp.aspect.customProperties
+        assert props["context_answerable"] == "true"
+        assert props["context_qa_confidence"] == "0.85"
