@@ -62,7 +62,7 @@ def _make_groq_response(text: str) -> MagicMock:
 class TestEvaluate:
     def test_returns_drift_result_for_anthropic(self) -> None:
         mock_client = _make_anthropic_tool_response(VALID_DATA)
-        with patch("agent.llm.judge.anthropic.Anthropic", return_value=mock_client):
+        with patch("agent.llm.client.anthropic.Anthropic", return_value=mock_client):
             result = evaluate(DIFF, CONTEXT, "anthropic", "fake-key", "claude-sonnet-4-6")
 
         assert isinstance(result, DriftResult)
@@ -72,7 +72,7 @@ class TestEvaluate:
 
     def test_anthropic_uses_tool_use_with_timeout(self) -> None:
         mock_client = _make_anthropic_tool_response(VALID_DATA)
-        with patch("agent.llm.judge.anthropic.Anthropic", return_value=mock_client):
+        with patch("agent.llm.client.anthropic.Anthropic", return_value=mock_client):
             evaluate(DIFF, CONTEXT, "anthropic", "fake-key", "claude-sonnet-4-6")
 
         call_kwargs = mock_client.messages.create.call_args.kwargs
@@ -83,7 +83,7 @@ class TestEvaluate:
     def test_groq_strips_markdown_fenced_json(self) -> None:
         wrapped = f"```json\n{json.dumps(VALID_DATA)}\n```"
         mock_client = _make_groq_response(wrapped)
-        with patch("agent.llm.judge.groq_sdk.Groq", return_value=mock_client):
+        with patch("agent.llm.client.groq_sdk.Groq", return_value=mock_client):
             result = evaluate(DIFF, CONTEXT, "groq", "fake-key", "llama-3.1-8b-instant")
 
         assert result.context_stale is True
@@ -92,28 +92,28 @@ class TestEvaluate:
     def test_groq_strips_plain_code_fence(self) -> None:
         wrapped = f"```\n{json.dumps(VALID_DATA)}\n```"
         mock_client = _make_groq_response(wrapped)
-        with patch("agent.llm.judge.groq_sdk.Groq", return_value=mock_client):
+        with patch("agent.llm.client.groq_sdk.Groq", return_value=mock_client):
             result = evaluate(DIFF, CONTEXT, "groq", "fake-key", "llama-3.1-8b-instant")
 
         assert result.context_stale is True
 
     def test_raises_value_error_on_non_json_response(self) -> None:
         mock_client = _make_groq_response("I cannot answer this question.")
-        with patch("agent.llm.judge.groq_sdk.Groq", return_value=mock_client):
+        with patch("agent.llm.client.groq_sdk.Groq", return_value=mock_client):
             with pytest.raises(ValueError, match="non-JSON"):
                 evaluate(DIFF, CONTEXT, "groq", "fake-key", "llama-3.1-8b-instant")
 
     def test_raises_value_error_on_missing_fields(self) -> None:
         incomplete = json.dumps({"context_stale": True})
         mock_client = _make_groq_response(incomplete)
-        with patch("agent.llm.judge.groq_sdk.Groq", return_value=mock_client):
+        with patch("agent.llm.client.groq_sdk.Groq", return_value=mock_client):
             with pytest.raises(ValueError, match="missing fields"):
                 evaluate(DIFF, CONTEXT, "groq", "fake-key", "llama-3.1-8b-instant")
 
     def test_raises_on_anthropic_timeout(self) -> None:
         client = MagicMock()
         client.messages.create.side_effect = TimeoutError("Connection timed out")
-        with patch("agent.llm.judge.anthropic.Anthropic", return_value=client):
+        with patch("agent.llm.client.anthropic.Anthropic", return_value=client):
             with pytest.raises(TimeoutError):
                 evaluate(DIFF, CONTEXT, "anthropic", "fake-key", "claude-sonnet-4-6")
 

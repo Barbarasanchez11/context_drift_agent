@@ -1,13 +1,8 @@
 from __future__ import annotations
 
-import json
-import re
 from datetime import UTC, datetime
 
-import anthropic
-import groq as groq_sdk
-import openai
-
+from agent.llm.client import call_llm
 from agent.llm.prompts import build_prompt
 from agent.models import ContextSnapshot, DriftResult, RichContext, SchemaDiff
 
@@ -26,8 +21,6 @@ _TOOL_SCHEMA = {
     },
 }
 
-_LLM_TIMEOUT = 30
-
 
 def evaluate(
     diff: SchemaDiff,
@@ -38,57 +31,10 @@ def evaluate(
     rich_context: RichContext | None = None,
 ) -> DriftResult:
     prompt = build_prompt(diff, context, rich_context)
-    data = _call_llm(prompt, llm_provider, api_key, model)
+    data = call_llm(
+        prompt, llm_provider, api_key, model, tool_name=_TOOL_NAME, tool_schema=_TOOL_SCHEMA
+    )
     return _parse_response(data, diff.dataset_urn)
-
-
-def _call_llm(prompt: str, provider: str, api_key: str, model: str) -> dict:
-    if provider == "anthropic":
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model=model,
-            max_tokens=256,
-            tools=[_TOOL_SCHEMA],
-            tool_choice={"type": "tool", "name": _TOOL_NAME},
-            messages=[{"role": "user", "content": prompt}],
-            timeout=_LLM_TIMEOUT,
-        )
-        for block in message.content:
-            if block.type == "tool_use" and block.name == _TOOL_NAME:
-                return block.input
-        raise ValueError(f"Anthropic response missing tool_use block: {message.content!r}")
-
-    if provider == "openai":
-        client = openai.OpenAI(api_key=api_key)
-        response = client.chat.completions.create(
-            model=model,
-            max_tokens=256,
-            response_format={"type": "json_object"},
-            messages=[{"role": "user", "content": prompt}],
-            timeout=_LLM_TIMEOUT,
-        )
-        return json.loads(response.choices[0].message.content)
-
-    if provider == "groq":
-        client = groq_sdk.Groq(api_key=api_key)
-        last_error: json.JSONDecodeError | None = None
-        for _ in range(2):
-            response = client.chat.completions.create(
-                model=model,
-                max_tokens=256,
-                response_format={"type": "json_object"},
-                messages=[{"role": "user", "content": prompt}],
-                timeout=_LLM_TIMEOUT,
-            )
-            raw = response.choices[0].message.content or ""
-            raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
-            try:
-                return json.loads(raw)
-            except json.JSONDecodeError as exc:
-                last_error = exc
-        raise ValueError(f"Groq returned non-JSON after 2 attempts: {raw!r}") from last_error
-
-    raise ValueError(f"Unsupported LLM provider: {provider!r}. Use 'anthropic', 'openai', or 'groq'.")  # noqa: E501
 
 
 def _parse_response(data: dict, dataset_urn: str) -> DriftResult:
