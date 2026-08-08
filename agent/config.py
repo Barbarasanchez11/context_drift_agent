@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     dataset_urns: str = ""
 
     use_mcp_context: bool = True
+    use_adversarial_judge: bool = False
 
     def get_urns(self) -> list[str]:
         # URNs are pipe-separated because URNs themselves contain commas

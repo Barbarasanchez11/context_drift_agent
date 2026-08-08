@@ -6,6 +6,7 @@ from agent.config import Settings
 from agent.datahub.graphql import get_context, get_schema
 from agent.datahub.poller import run_poll_loop
 from agent.datahub.writer import write_drift_result
+from agent.llm.adversarial_judge import evaluate_adversarial
 from agent.llm.judge import evaluate
 from agent.models import RichContext, SchemaDiff
 
@@ -56,14 +57,24 @@ def run(settings: Settings) -> None:
 
         rich_context = _get_rich_context(diff.dataset_urn, settings)
 
-        result = evaluate(
-            diff=diff,
-            context=context,
-            rich_context=rich_context,
-            llm_provider=settings.llm_provider,
-            api_key=settings.get_api_key(),
-            model=settings.llm_model,
-        )
+        if settings.use_adversarial_judge:
+            result = evaluate_adversarial(
+                diff=diff,
+                context=context,
+                rich_context=rich_context,
+                llm_provider=settings.llm_provider,
+                api_key=settings.get_api_key(),
+                model=settings.llm_model,
+            )
+        else:
+            result = evaluate(
+                diff=diff,
+                context=context,
+                rich_context=rich_context,
+                llm_provider=settings.llm_provider,
+                api_key=settings.get_api_key(),
+                model=settings.llm_model,
+            )
         logger.info(
             "LLM evaluation: context_stale=%s, confidence=%.2f",
             result.context_stale,
