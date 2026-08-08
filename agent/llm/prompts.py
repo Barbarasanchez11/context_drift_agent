@@ -57,3 +57,59 @@ Example: 90% sure context is stale → context_stale=true, context_confidence=0.
   "context_confidence": <float 0.0–1.0>,
   "context_drift_reason": "<≤500 chars, explain why the existing context is or is not still valid>"
 }}"""
+
+
+def build_question_generation_prompt(context: ContextSnapshot) -> str:  # noqa: E501
+    description = context.description or "(no description)"
+    glossary = ", ".join(context.glossary_terms) if context.glossary_terms else "none"
+
+    return (  # noqa: E501
+        f"You are a data analyst. Given a dataset's documentation, "
+        "generate exactly 3 realistic questions that a downstream "
+        "AI agent might ask before using this dataset.\n\n"
+        "## Dataset documentation\n"
+        f'Description: "{description}"\n'
+        f"Glossary terms: {glossary}\n\n"
+        "## Task\n"
+        "Generate questions that test whether the documentation is "
+        "sufficient for an AI agent to use this dataset with confidence. "
+        "Questions must be grounded in the actual content described — "
+        "not generic.\n\n"
+        "Respond with ONLY a JSON object — no preamble, no explanation "
+        "outside the JSON:\n"
+        "{\n"
+        '  "questions": [\n'
+        '    "<specific question 1>",\n'
+        '    "<specific question 2>",\n'
+        '    "<specific question 3>"\n'
+        "  ]\n"
+        "}"
+    )
+
+
+def build_answer_prompt(question: str, context: ContextSnapshot) -> str:  # noqa: E501
+    description = context.description or "(no description)"
+    glossary = ", ".join(context.glossary_terms) if context.glossary_terms else "none"
+
+    return (  # noqa: E501
+        "You are a data analyst. Answer the question using ONLY the "
+        "documentation provided below. Do NOT use external knowledge or "
+        "assumptions beyond what is written.\n\n"
+        "## Dataset documentation\n"
+        f'Description: "{description}"\n'
+        f"Glossary terms: {glossary}\n\n"
+        "## Question\n"
+        f"{question}\n\n"
+        "## Task\n"
+        "If the documentation contains enough information to answer "
+        "confidently, set answered=true and confidence accordingly.\n"
+        "If the documentation is too vague or missing key information, "
+        "set answered=false.\n\n"
+        "Respond with ONLY a JSON object — no preamble, no explanation "
+        "outside the JSON:\n"
+        "{\n"
+        '  "answered": <true|false>,\n'
+        '  "confidence": <float 0.0-1.0>,\n'
+        '  "reasoning": "<one sentence explaining why you can or cannot answer>"\n'
+        "}"
+    )
