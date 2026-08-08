@@ -1,0 +1,30 @@
+{
+  "diff": {
+    "dataset_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)",
+    "detected_at": "2026-07-31T10:05:00Z",
+    "changed_fields": [
+      {
+        "field_path": "credit_limit",
+        "old_type": "NUMBER",
+        "new_type": "STRING",
+        "change_type": "type_changed"
+      }
+    ],
+    "previous_fields": [
+      { "field_path": "credit_limit", "native_data_type": "NUMBER", "description": null }
+    ],
+    "current_fields": [
+      { "field_path": "credit_limit", "native_data_type": "STRING", "description": null }
+    ]
+  },
+  "context": {
+    "dataset_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)",
+    "description": "Maximum credit amount for the customer",
+    "glossary_terms": [],
+    "custom_properties": {}
+  },
+  "expected_drift_result": {
+    "context_stale": true,
+    "context_confidence_min": 0.7
+  }
+}

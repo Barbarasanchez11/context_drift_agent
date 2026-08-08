@@ -1,0 +1,53 @@
+from __future__ import annotations
+
+from datahub.emitter.mcp import MetadataChangeProposalWrapper
+from datahub.emitter.rest_emitter import DatahubRestEmitter
+from datahub.metadata.schema_classes import DatasetPropertiesClass
+
+from agent.models import DriftResult, ValidationResult
+
+
+def write_drift_result(
+    urn: str,
+    result: DriftResult,
+    gms_url: str,
+    token: str | None = None,
+    existing_description: str | None = None,
+) -> None:
+    custom_properties = {
+        "context_stale": str(result.context_stale).lower(),
+        "context_confidence": str(round(result.context_confidence, 4)),
+        "context_drift_reason": result.context_drift_reason,
+    }
+
+    emitter = DatahubRestEmitter(gms_server=gms_url, token=token)
+    mcp = MetadataChangeProposalWrapper(
+        entityUrn=urn,
+        aspect=DatasetPropertiesClass(
+            description=existing_description,
+            customProperties=custom_properties,
+        ),
+    )
+    emitter.emit(mcp)
+
+
+def write_qa_result(
+    urn: str,
+    result: ValidationResult,
+    gms_url: str,
+    token: str | None = None,
+    existing_description: str | None = None,
+) -> None:
+    custom_properties = {
+        "context_answerable": str(result.context_answerable).lower(),
+        "context_qa_confidence": str(round(result.context_qa_confidence, 4)),
+    }
+    emitter = DatahubRestEmitter(gms_server=gms_url, token=token)
+    mcp = MetadataChangeProposalWrapper(
+        entityUrn=urn,
+        aspect=DatasetPropertiesClass(
+            description=existing_description,
+            customProperties=custom_properties,
+        ),
+    )
+    emitter.emit(mcp)

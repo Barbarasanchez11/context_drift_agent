@@ -1,0 +1,36 @@
+{
+  "event": "context_stable",
+  "dataset_urn": "urn:li:dataset:(urn:li:dataPlatform:snowflake,b2fd91.order_entry_db.order_entry.customers,PROD)",
+  "schema_change": {
+    "field": "customer_since",
+    "old_type": "VARCHAR(16777216)",
+    "new_type": "TIMESTAMP_NTZ(9)",
+    "detected_at": "2026-08-04T11:20:00Z"
+  },
+  "context_at_detection": {
+    "description": "Date when the customer was first registered.",
+    "glossary_terms": [],
+    "mcp_enrichment": {
+      "downstream_assets": [
+        {"name": "customer_cohort_analysis", "entity_type": "DATASET", "platform": "snowflake"}
+      ],
+      "owners": ["urn:li:corpuser:data.engineering"],
+      "domain": "Finance",
+      "data_source": "mcp"
+    }
+  },
+  "llm_evaluation": {
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "context_stale": false,
+    "context_confidence": 0.88,
+    "context_drift_reason": "Field customer_since changed from VARCHAR to TIMESTAMP_NTZ(9). The description states it records 'when the customer was first registered', which is a date concept. A more precise TIMESTAMP type better represents the semantic intent — this is a type improvement, not a semantic break. The existing documentation remains accurate."
+  },
+  "written_to_datahub": {
+    "customProperties": {
+      "context_stale": "false",
+      "context_confidence": "0.88",
+      "context_drift_reason": "Field customer_since changed from VARCHAR to TIMESTAMP_NTZ(9). The description states it records 'when the customer was first registered', which is a date concept. A more precise TIMESTAMP type better represents the semantic intent — this is a type improvement, not a semantic break. The existing documentation remains accurate."
+    }
+  }
+}
