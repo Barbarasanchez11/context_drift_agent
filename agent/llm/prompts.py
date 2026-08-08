@@ -87,6 +87,34 @@ def build_question_generation_prompt(context: ContextSnapshot) -> str:  # noqa: 
     )
 
 
+def build_adversarial_prosecutor_prompt(
+    diff: SchemaDiff,
+    context: ContextSnapshot,
+    rich_context: RichContext | None = None,
+) -> str:
+    base = build_prompt(diff, context, rich_context)
+    preamble = (
+        "You are a strict data quality auditor. "
+        "Your role is to identify reasons why the existing documentation is STALE "
+        "after this schema change. Be thorough in finding inconsistencies.\n\n"
+    )
+    return preamble + base
+
+
+def build_adversarial_defender_prompt(
+    diff: SchemaDiff,
+    context: ContextSnapshot,
+    rich_context: RichContext | None = None,
+) -> str:
+    base = build_prompt(diff, context, rich_context)
+    preamble = (
+        "You are a conservative data steward who avoids false alarms. "
+        "Your role is to evaluate whether existing documentation truly needs updating. "
+        "Many schema changes do not actually invalidate existing descriptions.\n\n"
+    )
+    return preamble + base
+
+
 def build_answer_prompt(question: str, context: ContextSnapshot) -> str:  # noqa: E501
     description = context.description or "(no description)"
     glossary = ", ".join(context.glossary_terms) if context.glossary_terms else "none"
