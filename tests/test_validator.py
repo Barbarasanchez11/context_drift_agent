@@ -32,16 +32,6 @@ _QUESTIONS_RESPONSE = json.dumps({
 })
 
 
-def _make_text_response(text: str) -> MagicMock:
-    block = MagicMock()
-    block.text = text
-    message = MagicMock()
-    message.content = [block]
-    client = MagicMock()
-    client.messages.create.return_value = message
-    return client
-
-
 class TestValidateContextSufficiency:
     def test_rich_context_returns_answerable_true(self) -> None:
         high_confidence_answer = json.dumps({
