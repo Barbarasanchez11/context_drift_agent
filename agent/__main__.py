@@ -3,8 +3,8 @@ from __future__ import annotations
 import logging
 import sys
 
-from agent.config import Settings
 from agent import pipeline
+from agent.config import Settings
 
 
 def main() -> None:

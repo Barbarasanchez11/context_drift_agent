@@ -2,10 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from agent.datahub.poller import compute_schema_hash, detect_change, run_poll_loop
-from agent.models import SchemaField, SchemaDiff
+from agent.models import SchemaDiff, SchemaField
 
 FIELD_NUMBER = SchemaField(field_path="credit_limit", native_data_type="NUMBER")
 FIELD_STRING = SchemaField(field_path="credit_limit", native_data_type="STRING")
