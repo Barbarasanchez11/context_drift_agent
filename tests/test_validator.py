@@ -11,7 +11,7 @@ from agent.models import ContextSnapshot, ValidationResult
 RICH_CONTEXT = ContextSnapshot(
     dataset_urn="urn:li:dataset:(urn:li:dataPlatform:snowflake,customers,PROD)",
     description="Customer master table. credit_limit is the maximum credit in USD. "
-                "high_value_customer flag indicates lifetime value > $10,000.",
+    "high_value_customer flag indicates lifetime value > $10,000.",
     glossary_terms=["CreditLimit", "HighValueCustomer"],
     custom_properties={},
 )
@@ -23,21 +23,26 @@ THIN_CONTEXT = ContextSnapshot(
     custom_properties={},
 )
 
-_QUESTIONS_RESPONSE = json.dumps({
-    "questions": [
-        "What does credit_limit represent?",
-        "Can I use this table to filter high-value customers?",
-        "What currency is credit_limit stored in?",
-    ]
-})
+_QUESTIONS_RESPONSE = json.dumps(
+    {
+        "questions": [
+            "What does credit_limit represent?",
+            "Can I use this table to filter high-value customers?",
+            "What currency is credit_limit stored in?",
+        ]
+    }
+)
 
 
 class TestValidateContextSufficiency:
     def test_rich_context_returns_answerable_true(self) -> None:
-        high_confidence_answer = json.dumps({
-            "answered": True, "confidence": 0.9,
-            "reasoning": "Description clearly explains this field."
-        })
+        high_confidence_answer = json.dumps(
+            {
+                "answered": True,
+                "confidence": 0.9,
+                "reasoning": "Description clearly explains this field.",
+            }
+        )
         responses = iter([_QUESTIONS_RESPONSE] + [high_confidence_answer] * 3)
         mock_client = MagicMock()
         mock_client.messages.create.side_effect = lambda **kw: _msg(next(responses))
@@ -53,10 +58,9 @@ class TestValidateContextSufficiency:
         assert len(result.questions) == 3
 
     def test_thin_context_returns_answerable_false(self) -> None:
-        low_confidence_answer = json.dumps({
-            "answered": False, "confidence": 0.1,
-            "reasoning": "No description available."
-        })
+        low_confidence_answer = json.dumps(
+            {"answered": False, "confidence": 0.1, "reasoning": "No description available."}
+        )
         responses = iter([_QUESTIONS_RESPONSE] + [low_confidence_answer] * 3)
         mock_client = MagicMock()
         mock_client.messages.create.side_effect = lambda **kw: _msg(next(responses))
@@ -90,6 +94,9 @@ class TestValidateContextSufficiency:
 
 def _msg(text: str) -> MagicMock:
     block = MagicMock()
+    # A bare MagicMock returns a mock for .type, which no longer matches the
+    # text-block guard in call_llm. Set it to the real SDK value.
+    block.type = "text"
     block.text = text
     message = MagicMock()
     message.content = [block]

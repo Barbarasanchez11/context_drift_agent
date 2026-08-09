@@ -8,6 +8,7 @@ Run once before starting the agent.
 Usage:
     python scripts/setup_demo.py
 """
+
 from __future__ import annotations
 
 import sys
@@ -39,35 +40,41 @@ _AUDIT_STAMP = AuditStampClass(time=0, actor="urn:li:corpuser:datahub")
 def main() -> None:
     emitter = DatahubRestEmitter(gms_server=GMS_URL)
 
-    emitter.emit(MetadataChangeProposalWrapper(
-        entityUrn=DATASET_URN,
-        aspect=DatasetPropertiesClass(
-            description=DESCRIPTION,
-            customProperties={},
-        ),
-    ))
+    emitter.emit(
+        MetadataChangeProposalWrapper(
+            entityUrn=DATASET_URN,
+            aspect=DatasetPropertiesClass(
+                description=DESCRIPTION,
+                customProperties={},
+            ),
+        )
+    )
     print(f"Description written for:\n  {DATASET_URN}")
 
-    emitter.emit(MetadataChangeProposalWrapper(
-        entityUrn=GLOSSARY_TERM_URN,
-        aspect=GlossaryTermInfoClass(
-            definition=(
-                "A field that stores a numeric financial measurement such as "
-                "an amount, limit, or balance. Values are expected to be numbers."
+    emitter.emit(
+        MetadataChangeProposalWrapper(
+            entityUrn=GLOSSARY_TERM_URN,
+            aspect=GlossaryTermInfoClass(
+                definition=(
+                    "A field that stores a numeric financial measurement such as "
+                    "an amount, limit, or balance. Values are expected to be numbers."
+                ),
+                name="NumericMetric",
+                termSource="INTERNAL",
             ),
-            name="NumericMetric",
-            termSource="INTERNAL",
-        ),
-    ))
+        )
+    )
     print(f"\nGlossary term created:\n  {GLOSSARY_TERM_URN}")
 
-    emitter.emit(MetadataChangeProposalWrapper(
-        entityUrn=DATASET_URN,
-        aspect=GlossaryTermsClass(
-            terms=[GlossaryTermAssociationClass(urn=GLOSSARY_TERM_URN)],
-            auditStamp=_AUDIT_STAMP,
-        ),
-    ))
+    emitter.emit(
+        MetadataChangeProposalWrapper(
+            entityUrn=DATASET_URN,
+            aspect=GlossaryTermsClass(
+                terms=[GlossaryTermAssociationClass(urn=GLOSSARY_TERM_URN)],
+                auditStamp=_AUDIT_STAMP,
+            ),
+        )
+    )
     print("\nGlossary term attached to dataset.")
     print("\nDone. You can now start the agent with: python -m agent")
 

@@ -43,12 +43,14 @@ def detect_change(
                 )
             )
         elif previous_by_path[path].native_data_type != field.native_data_type:
-            changes.append(FieldChange(
-                field_path=path,
-                old_type=previous_by_path[path].native_data_type,
-                new_type=field.native_data_type,
-                change_type="type_changed",
-            ))
+            changes.append(
+                FieldChange(
+                    field_path=path,
+                    old_type=previous_by_path[path].native_data_type,
+                    new_type=field.native_data_type,
+                    change_type="type_changed",
+                )
+            )
 
     for path, field in previous_by_path.items():
         if path not in current_by_path:

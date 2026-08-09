@@ -18,6 +18,7 @@ def _get_rich_context(urn: str, settings: Settings) -> RichContext | None:
         return None
     try:
         from agent.datahub.mcp_context import get_rich_context
+
         return get_rich_context(urn, settings.datahub_gms_url, settings.datahub_token)
     except ImportError:
         logger.debug("mcp package not installed — skipping MCP context enrichment")

@@ -102,9 +102,7 @@ def get_context(
     glossary_terms: list[str] = []
     if glossary_data:
         glossary_terms = [
-            t["term"]["name"]
-            for t in (glossary_data.get("terms") or [])
-            if t.get("term")
+            t["term"]["name"] for t in (glossary_data.get("terms") or []) if t.get("term")
         ]
     return ContextSnapshot(
         dataset_urn=urn,

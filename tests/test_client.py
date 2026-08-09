@@ -10,7 +10,9 @@ from agent.llm.client import call_llm
 
 def _make_anthropic_text_response(text: str) -> MagicMock:
     block = MagicMock()
-    block.type = "message"
+    # Must match the real SDK: TextBlock.type is Literal["text"]. "message" is
+    # the response type, not a content-block type.
+    block.type = "text"
     block.text = text
     message = MagicMock()
     message.content = [block]

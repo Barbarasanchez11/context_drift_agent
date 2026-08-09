@@ -20,14 +20,14 @@ from pydantic import BaseModel
 
 class SchemaField(BaseModel):
     field_path: str
-    native_data_type: str          # e.g. "NUMBER", "STRING", "BOOLEAN"
+    native_data_type: str  # e.g. "NUMBER", "STRING", "BOOLEAN"
     description: str | None = None
 
 
 class FieldChange(BaseModel):
     field_path: str
-    old_type: str | None           # None when change_type == "added"
-    new_type: str | None           # None when change_type == "removed"
+    old_type: str | None  # None when change_type == "added"
+    new_type: str | None  # None when change_type == "removed"
     change_type: Literal["added", "removed", "type_changed"]
 
 
@@ -42,7 +42,7 @@ class SchemaDiff(BaseModel):
 class ContextSnapshot(BaseModel):
     dataset_urn: str
     description: str | None
-    glossary_terms: list[str]      # list of term names, e.g. ["CreditRisk"]
+    glossary_terms: list[str]  # list of term names, e.g. ["CreditRisk"]
     custom_properties: dict[str, str]
 
 
@@ -50,8 +50,8 @@ class DriftResult(BaseModel):
     dataset_urn: str
     evaluated_at: datetime
     context_stale: bool
-    context_confidence: float      # 0.0–1.0
-    context_drift_reason: str      # human-readable, ≤ 500 chars
+    context_confidence: float  # 0.0–1.0
+    context_drift_reason: str  # human-readable, ≤ 500 chars
 ```
 
 ---
@@ -68,15 +68,14 @@ def get_schema(
     urn: str,
     gms_url: str,
     token: str | None = None,
-) -> list[SchemaField]:
-    ...
+) -> list[SchemaField]: ...
+
 
 def get_context(
     urn: str,
     gms_url: str,
     token: str | None = None,
-) -> ContextSnapshot:
-    ...
+) -> ContextSnapshot: ...
 ```
 
 ### `get_schema` — example output
@@ -153,6 +152,7 @@ def compute_schema_hash(fields: list[SchemaField]) -> str:
     """SHA-256 of sorted (field_path, native_data_type) pairs."""
     ...
 
+
 def detect_change(
     urn: str,
     current_fields: list[SchemaField],
@@ -160,6 +160,7 @@ def detect_change(
 ) -> SchemaDiff | None:
     """Returns SchemaDiff if schema changed, None if identical."""
     ...
+
 
 def run_poll_loop(
     urns: list[str],
@@ -226,11 +227,10 @@ def run_poll_loop(
 def evaluate(
     diff: SchemaDiff,
     context: ContextSnapshot,
-    llm_provider: str,       # "anthropic" or "openai"
+    llm_provider: str,  # "anthropic" or "openai"
     api_key: str,
-    model: str,              # e.g. "claude-sonnet-4-6", "gpt-4o"
-) -> DriftResult:
-    ...
+    model: str,  # e.g. "claude-sonnet-4-6", "gpt-4o"
+) -> DriftResult: ...
 ```
 
 ```python

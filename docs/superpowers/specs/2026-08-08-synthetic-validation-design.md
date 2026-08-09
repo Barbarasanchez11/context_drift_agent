@@ -80,9 +80,10 @@ class AnswerResult(BaseModel):
     confidence: float
     reasoning: str
 
+
 class ValidationResult(BaseModel):
     questions: list[AnswerResult]
-    context_answerable: bool    # True if avg_confidence > 0.5
+    context_answerable: bool  # True if avg_confidence > 0.5
     context_qa_confidence: float
 ```
 

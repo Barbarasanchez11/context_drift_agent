@@ -11,6 +11,7 @@ Usage:
     python scripts/simulate_drift.py          # apply drift (FLOAT -> VARCHAR)
     python scripts/simulate_drift.py --reset  # restore original (VARCHAR -> FLOAT)
 """
+
 from __future__ import annotations
 
 import sys
@@ -40,7 +41,9 @@ _STRING_TYPE = SchemaFieldDataTypeClass(type=StringTypeClass())
 _NUMBER_TYPE = SchemaFieldDataTypeClass(type=NumberTypeClass())
 
 
-def _make_field(path: str, native_type: str, field_type: SchemaFieldDataTypeClass) -> SchemaFieldClass:  # noqa: E501
+def _make_field(
+    path: str, native_type: str, field_type: SchemaFieldDataTypeClass
+) -> SchemaFieldClass:  # noqa: E501
     return SchemaFieldClass(
         fieldPath=path,
         type=field_type,
@@ -50,32 +53,33 @@ def _make_field(path: str, native_type: str, field_type: SchemaFieldDataTypeClas
 
 
 ORIGINAL_SCHEMA: list[SchemaFieldClass] = [
-    _make_field("customer_id",      "NUMBER(38,0)",      _NUMBER_TYPE),
-    _make_field("cust_first_name",  "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("cust_last_name",   "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("nls_language",     "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("nls_territory",    "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("credit_limit",     "FLOAT",             _NUMBER_TYPE),  # original
-    _make_field("cust_email",       "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("account_mgr_id",   "NUMBER(38,0)",      _NUMBER_TYPE),
-    _make_field("customer_since",   "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("customer_class",   "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("suggestions",      "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("dob",              "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("mailshot",         "NUMBER(38,0)",      _NUMBER_TYPE),
-    _make_field("partner_mailshot", "NUMBER(38,0)",      _NUMBER_TYPE),
-    _make_field("phone_number",     "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("address_line1",    "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("address_line2",    "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("address_line3",    "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("town_city",        "VARCHAR(16777216)", _STRING_TYPE),
-    _make_field("country_id",       "NUMBER(38,0)",      _NUMBER_TYPE),
-    _make_field("zipcode",          "NUMBER(38,0)",      _NUMBER_TYPE),
-    _make_field("region_id",        "NUMBER(38,0)",      _NUMBER_TYPE),
+    _make_field("customer_id", "NUMBER(38,0)", _NUMBER_TYPE),
+    _make_field("cust_first_name", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("cust_last_name", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("nls_language", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("nls_territory", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("credit_limit", "FLOAT", _NUMBER_TYPE),  # original
+    _make_field("cust_email", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("account_mgr_id", "NUMBER(38,0)", _NUMBER_TYPE),
+    _make_field("customer_since", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("customer_class", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("suggestions", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("dob", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("mailshot", "NUMBER(38,0)", _NUMBER_TYPE),
+    _make_field("partner_mailshot", "NUMBER(38,0)", _NUMBER_TYPE),
+    _make_field("phone_number", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("address_line1", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("address_line2", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("address_line3", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("town_city", "VARCHAR(16777216)", _STRING_TYPE),
+    _make_field("country_id", "NUMBER(38,0)", _NUMBER_TYPE),
+    _make_field("zipcode", "NUMBER(38,0)", _NUMBER_TYPE),
+    _make_field("region_id", "NUMBER(38,0)", _NUMBER_TYPE),
 ]
 
 DRIFTED_SCHEMA: list[SchemaFieldClass] = [
-    f if f.fieldPath != "credit_limit"
+    f
+    if f.fieldPath != "credit_limit"
     else _make_field("credit_limit", "VARCHAR(16777216)", _STRING_TYPE)
     for f in ORIGINAL_SCHEMA
 ]

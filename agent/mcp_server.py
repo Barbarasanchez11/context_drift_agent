@@ -24,7 +24,7 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 
 from agent.config import Settings
 from agent.datahub.graphql import get_context, get_schema
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 _STATE_PATH = Path(".state/schema_hashes.json")
 
-mcp = FastMCP(
+mcp = MCPServer(
     "context-drift-agent",
     instructions=(
         "Tools for detecting and querying metadata context drift in DataHub datasets. "
@@ -70,6 +70,7 @@ def check_drift(urn: str) -> dict:
         if urn not in state:
             # First time — store baseline, nothing to compare yet
             from agent.datahub.poller import _save_state
+
             _save_state(urn, current_fields, _STATE_PATH)
             return {
                 "status": "baseline_stored",
@@ -95,6 +96,7 @@ def check_drift(urn: str) -> dict:
         if settings.use_mcp_context:
             try:
                 from agent.datahub.mcp_context import get_rich_context
+
                 rich_context = get_rich_context(
                     urn, settings.datahub_gms_url, settings.datahub_token
                 )

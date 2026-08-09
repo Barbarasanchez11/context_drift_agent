@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import json
 import re
+from typing import cast
 
 import anthropic
 import groq as groq_sdk
 import openai
+from anthropic.types import ToolParam
 
 _LLM_TIMEOUT = 30
 
@@ -24,7 +26,7 @@ def call_llm(
             message = client.messages.create(
                 model=model,
                 max_tokens=256,
-                tools=[tool_schema],
+                tools=[cast(ToolParam, tool_schema)],
                 tool_choice={"type": "tool", "name": tool_name},
                 messages=[{"role": "user", "content": prompt}],
                 timeout=_LLM_TIMEOUT,
@@ -40,7 +42,10 @@ def call_llm(
                 messages=[{"role": "user", "content": prompt}],
                 timeout=_LLM_TIMEOUT,
             )
-            raw = message.content[0].text if message.content else ""
+            # Pick the first text block rather than indexing blindly: the
+            # response may lead with a thinking or tool_use block, which has
+            # no .text attribute.
+            raw = next((b.text for b in message.content if b.type == "text"), "")
             raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
             return json.loads(raw)  # type: ignore[return-value]
 

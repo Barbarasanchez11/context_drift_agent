@@ -198,7 +198,9 @@ def evaluate(
     rich_context: RichContext | None = None,
 ) -> DriftResult:
     prompt = build_prompt(diff, context, rich_context)
-    data = call_llm(prompt, llm_provider, api_key, model, tool_name=_TOOL_NAME, tool_schema=_TOOL_SCHEMA)
+    data = call_llm(
+        prompt, llm_provider, api_key, model, tool_name=_TOOL_NAME, tool_schema=_TOOL_SCHEMA
+    )
     return _parse_response(data, diff.dataset_urn)
 
 
@@ -276,6 +278,7 @@ git commit -m "refactor: extract shared LLM call logic to client.py"
       confidence: float
       reasoning: str
 
+
   class ValidationResult(BaseModel):
       questions: list[AnswerResult]
       context_answerable: bool
@@ -296,8 +299,8 @@ class AnswerResult(BaseModel):
 
 class ValidationResult(BaseModel):
     questions: list[AnswerResult]
-    context_answerable: bool        # True if avg_confidence > 0.5
-    context_qa_confidence: float    # average confidence across all questions
+    context_answerable: bool  # True if avg_confidence > 0.5
+    context_qa_confidence: float  # average confidence across all questions
 ```
 
 - [ ] **Step 2: Verify with a quick import check**
@@ -499,7 +502,7 @@ from agent.models import ContextSnapshot, ValidationResult
 RICH_CONTEXT = ContextSnapshot(
     dataset_urn="urn:li:dataset:(urn:li:dataPlatform:snowflake,customers,PROD)",
     description="Customer master table. credit_limit is the maximum credit in USD. "
-                "high_value_customer flag indicates lifetime value > $10,000.",
+    "high_value_customer flag indicates lifetime value > $10,000.",
     glossary_terms=["CreditLimit", "HighValueCustomer"],
     custom_properties={},
 )
@@ -511,13 +514,15 @@ THIN_CONTEXT = ContextSnapshot(
     custom_properties={},
 )
 
-_QUESTIONS_RESPONSE = json.dumps({
-    "questions": [
-        "What does credit_limit represent?",
-        "Can I use this table to filter high-value customers?",
-        "What currency is credit_limit stored in?",
-    ]
-})
+_QUESTIONS_RESPONSE = json.dumps(
+    {
+        "questions": [
+            "What does credit_limit represent?",
+            "Can I use this table to filter high-value customers?",
+            "What currency is credit_limit stored in?",
+        ]
+    }
+)
 
 
 def _make_text_response(text: str) -> MagicMock:
@@ -532,10 +537,13 @@ def _make_text_response(text: str) -> MagicMock:
 
 class TestValidateContextSufficiency:
     def test_rich_context_returns_answerable_true(self) -> None:
-        high_confidence_answer = json.dumps({
-            "answered": True, "confidence": 0.9,
-            "reasoning": "Description clearly explains this field."
-        })
+        high_confidence_answer = json.dumps(
+            {
+                "answered": True,
+                "confidence": 0.9,
+                "reasoning": "Description clearly explains this field.",
+            }
+        )
         responses = iter([_QUESTIONS_RESPONSE] + [high_confidence_answer] * 3)
         mock_client = MagicMock()
         mock_client.messages.create.side_effect = lambda **kw: _msg(next(responses))
@@ -551,10 +559,9 @@ class TestValidateContextSufficiency:
         assert len(result.questions) == 3
 
     def test_thin_context_returns_answerable_false(self) -> None:
-        low_confidence_answer = json.dumps({
-            "answered": False, "confidence": 0.1,
-            "reasoning": "No description available."
-        })
+        low_confidence_answer = json.dumps(
+            {"answered": False, "confidence": 0.1, "reasoning": "No description available."}
+        )
         responses = iter([_QUESTIONS_RESPONSE] + [low_confidence_answer] * 3)
         mock_client = MagicMock()
         mock_client.messages.create.side_effect = lambda **kw: _msg(next(responses))
@@ -716,6 +723,7 @@ from agent.datahub.writer import write_drift_result, write_qa_result
 from agent.models import AnswerResult, DriftResult, ValidationResult
 
 # (keep existing imports and tests unchanged, add below)
+
 
 class TestWriteQaResult:
     def test_emits_mcp_with_qa_properties(self) -> None:

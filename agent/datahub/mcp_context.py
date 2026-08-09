@@ -13,11 +13,13 @@ Requires: mcp>=1.0, mcp-server-datahub>=0.6 (uvx mcp-server-datahub)
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 from typing import Any
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
+from mcp.types import TextContent
 
 from agent.models import DownstreamAsset, RichContext
 
@@ -29,10 +31,12 @@ _MCP_SERVER_ARGS = ["mcp-server-datahub"]
 
 async def _call_tool(session: ClientSession, name: str, arguments: dict) -> Any:
     result = await session.call_tool(name, arguments)
-    # FastMCP returns content as a list of TextContent blocks
-    if result.content and hasattr(result.content[0], "text"):
-        import json
-        return json.loads(result.content[0].text)
+    # The MCP server returns a list of content blocks; only TextContent carries
+    # the JSON payload. Other block types (images, embedded resources) have no
+    # .text attribute, so match on the block type rather than assuming index 0.
+    for block in result.content:
+        if isinstance(block, TextContent):
+            return json.loads(block.text)
     return {}
 
 
@@ -53,13 +57,17 @@ async def _fetch_rich_context(urn: str, gms_url: str, token: str) -> RichContext
 
             # Downstream lineage — upstream=False means downstream direction
             try:
-                lineage = await _call_tool(session, "get_lineage", {
-                    "urn": urn,
-                    "upstream": False,
-                    "max_results": 10,
-                    "max_hops": 2,
-                })
-                for item in (lineage.get("downstreams", {}).get("searchResults") or []):
+                lineage = await _call_tool(
+                    session,
+                    "get_lineage",
+                    {
+                        "urn": urn,
+                        "upstream": False,
+                        "max_results": 10,
+                        "max_hops": 2,
+                    },
+                )
+                for item in lineage.get("downstreams", {}).get("searchResults") or []:
                     entity = item.get("entity", {})
                     if not entity:
                         continue
@@ -67,19 +75,22 @@ async def _fetch_rich_context(urn: str, gms_url: str, token: str) -> RichContext
                     name = (
                         (entity.get("properties") or {}).get("name")
                         or (entity.get("editableProperties") or {}).get("name")
-                        or asset_urn.split(",")[-2] if "," in asset_urn else asset_urn
+                        or asset_urn.split(",")[-2]
+                        if "," in asset_urn
+                        else asset_urn
                     )
                     entity_type = entity.get("type", "UNKNOWN")
-                    platform = (
-                        (entity.get("platform") or {}).get("name")
-                        or (entity.get("platform") or {}).get("urn", "").split(":")[-1]
+                    platform = (entity.get("platform") or {}).get("name") or (
+                        entity.get("platform") or {}
+                    ).get("urn", "").split(":")[-1]
+                    downstream_assets.append(
+                        DownstreamAsset(
+                            urn=asset_urn,
+                            name=str(name),
+                            entity_type=entity_type,
+                            platform=platform or None,
+                        )
                     )
-                    downstream_assets.append(DownstreamAsset(
-                        urn=asset_urn,
-                        name=str(name),
-                        entity_type=entity_type,
-                        platform=platform or None,
-                    ))
             except Exception as exc:
                 logger.debug("get_lineage failed for %s: %s", urn, exc)
 
@@ -87,8 +98,8 @@ async def _fetch_rich_context(urn: str, gms_url: str, token: str) -> RichContext
             try:
                 entities = await _call_tool(session, "get_entities", {"urns": [urn]})
                 entity = entities[0] if isinstance(entities, list) else entities
-                ownership = (entity.get("ownership") or {})
-                for owner_entry in (ownership.get("owners") or []):
+                ownership = entity.get("ownership") or {}
+                for owner_entry in ownership.get("owners") or []:
                     owner_urn = (owner_entry.get("owner") or {}).get("urn")
                     if owner_urn:
                         owners.append(owner_urn)
