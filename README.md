@@ -105,6 +105,7 @@ Watch the agent detect the change and write `context_stale=true` back to DataHub
 | `POLL_INTERVAL_SECONDS` | `30` | Polling frequency |
 | `DATASET_URNS` | *(required)* | Pipe-separated dataset URNs to watch |
 | `USE_MCP_CONTEXT` | `true` | Enrich via DataHub MCP Server |
+| `USE_ADVERSARIAL_JUDGE` | `false` | Two-agent debate instead of a single judge (see below) |
 
 `DATASET_URNS` uses `|` as separator because URNs themselves contain commas:
 ```
@@ -225,11 +226,9 @@ Q3 [PASS] Is this dataset safe to use for credit risk models?
 
 ---
 
-## Roadmap
+## Adversarial Evaluation
 
-### Adversarial LLM Evaluation
-
-Replace the single LLM judge with a two-agent debate:
+Set `USE_ADVERSARIAL_JUDGE=true` to replace the single LLM judge with a two-agent debate:
 
 - **Prosecutor** — argues the context *is* stale, looks for inconsistencies
 - **Defender** — argues the context is *still valid*, avoids false alarms
@@ -239,6 +238,13 @@ When both agree the confidence is high. When they disagree the confidence is cap
 arguments are surfaced in `context_drift_reason`, giving operators full visibility into the
 uncertainty. This pattern is harder to fool than a single-pass evaluation and produces more
 explainable outputs.
+
+It costs roughly three LLM calls per drift event instead of one, so it is off by default — turn
+it on for high-stakes datasets where a false alarm is expensive.
+
+---
+
+## Roadmap
 
 ### Proactive Validation Loop
 
