@@ -1,6 +1,6 @@
 # Context Drift Agent
 
-![CI](https://github.com/Barbarasanchez11/context-drift-agent/workflows/ci/badge.svg)
+[![CI](https://github.com/Barbarasanchez11/context_drift_agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Barbarasanchez11/context_drift_agent/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://python.org)
 
@@ -13,6 +13,16 @@ the field assuming the old contract. This is context drift.
 
 Context Drift Agent detects it automatically, explains why the context is stale, and writes the
 result back into DataHub so every person and agent downstream inherits the signal.
+
+---
+
+## Demo
+
+[![Watch the demo](https://img.youtube.com/vi/kOfGn0jRrH4/maxresdefault.jpg)](https://www.youtube.com/watch?v=kOfGn0jRrH4)
+
+Two and a half minutes, end to end: a schema change makes an existing description false, the agent
+explains why, and the verdict lands in DataHub as `customProperties`. Then the change is reverted —
+and the agent correctly reports **no drift**, because the documentation is accurate again.
 
 ---
 
